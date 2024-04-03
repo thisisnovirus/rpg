@@ -1,0 +1,623 @@
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>RPGを作ってみよう！</title>
+<link rel="stylesheet" href="base.css">
+</head>
+
+<body>
+
+<div id="wrapper">
+    <div id="box">
+        <canvas id="canvas"></canvas>
+
+        <div id="cover">
+            <p><img src="img/start.png" width="640" height="640" alt="THE RPG"></p>
+        </div>
+
+        <p id="hp">プレイヤーのHP：<span class="myPoint">50</span></p>
+
+        <!-- 敵1 -->
+        <div class="enemy1">
+            <p class="enemyName1">ひとつめ地蔵：<span class="enemyPoint1">10</span></p>
+            <p class="enemyImg1"><img src="img/enemy/enemy01.png" width="150" height="150"></p>
+            <ul class="commandList">
+                <li class="command1">戦う</li>
+                <li class="command2">逃げる</li>
+            </ul>
+            <p class="message">敵が現れた</p>
+        </div>
+
+        <!-- 敵2 -->
+        <div class="enemy2">
+            <p class="enemyName2">スマイリーマン：<span class="enemyPoint2">15</span></p>
+            <p class="enemyImg2"><img src="img/enemy/enemy02.png" width="150" height="150"></p>
+            <ul class="commandList">
+                <li class="command1">戦う</li>
+                <li class="command2">逃げる</li>
+            </ul>
+            <p class="message">敵が現れた</p>
+        </div>
+
+        <!-- 敵3 -->
+        <div class="enemy3">
+            <p class="enemyName3">黒い魔導士：<span class="enemyPoint3">20</span></p>
+            <p class="enemyImg3"><img src="img/enemy/enemy03.png" width="150" height="150"></p>
+            <ul class="commandList">
+                <li class="command1">戦う</li>
+                <li class="command2">逃げる</li>
+            </ul>
+            <p class="message">敵が現れた</p>
+        </div>
+
+        <!-- GAMEOVER -->
+        <div id="gameover">
+            <p><img src="img/hitsugi.png" width="640" height="640" alt="Gameover"></p>
+        </div>
+
+        <!-- GOAL!! -->
+        <div id="goal">
+            <p><img src="img/goal.png" width="640" height="640" alt="Goal!!"></p>
+        </div>
+
+    </div>
+    <p id="hp2">プレイヤーのHP:<span class="myPoint">50</span></p>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+
+// キャンバスの設定
+let canvas = $('#canvas')[0];
+canvas.width = 640;
+canvas.height = 640;
+let ctx = canvas.getContext('2d');
+
+// マップイメージのオブジェクトを作成
+let mapImg = new Image();
+mapImg.src = "img/map.png";
+
+// マップ作成
+let map = [
+	[0,0,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+	[0,1,0,0,0,1,1,1,0,1,0,1,1,0,1,1,1,0,1,0],
+	[0,0,1,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0],
+	[1,0,1,0,1,1,0,0,0,1,1,1,1,1,0,0,1,0,1,0],
+	[0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,0,1,1,0],
+	[0,1,1,1,0,0,0,0,0,1,0,1,1,1,0,1,0,0,0,0],
+	[0,1,1,1,0,1,1,1,1,1,0,1,0,0,0,0,1,1,1,0],
+	[0,0,0,1,0,0,0,0,1,0,0,1,0,1,1,0,0,0,1,0],
+	[1,1,0,1,1,1,1,1,1,0,1,1,0,0,1,1,1,0,1,1],
+	[1,0,0,0,0,0,1,1,0,0,0,0,1,0,1,1,0,0,1,0],
+	[1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,0,1,1,0,0],
+	[1,0,1,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,0,1],
+	[0,0,1,0,0,1,0,0,1,0,0,1,0,1,0,1,1,1,0,0],
+	[0,1,1,1,0,1,0,1,0,0,1,1,0,1,0,1,1,0,1,0],
+	[0,0,0,1,0,1,0,0,1,0,1,1,0,1,0,0,0,0,0,0],
+	[1,1,0,1,0,1,0,1,1,0,0,1,0,1,1,0,1,1,1,0],
+	[0,0,0,1,0,1,1,1,1,1,0,1,0,1,1,0,0,0,1,0],
+	[0,1,1,1,0,1,0,0,0,0,0,1,0,0,0,1,1,0,1,1],
+	[0,1,0,0,0,1,0,1,1,1,0,0,1,1,0,1,0,0,0,0],
+	[0,0,0,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1,1,2]
+]
+
+// プレイヤーのオブジェクトを作成
+let player = new Object();
+player.img = new Image();
+player.img.src = "img/image-removebg-preview (1).png";
+player.x = 0;
+player.y = 0;
+player.move = 0;
+
+// キーボードのオブジェクトを作成
+let key = new Object();
+key.up = false;
+key.down = false;
+key.right = false;
+key.left = false;
+key.push = "";
+
+// キーボードを押したときの関数
+function keyDownFunc(e){
+    let key_code = e.keyCode;
+    if(key_code == 37) key.left = true;
+    if(key_code == 38) key.up = true;
+    if(key_code == 39) key.right = true;
+    if(key_code == 40) key.down = true;
+    event.preventDefault();
+}
+
+function showMessage(target, message){
+        for(let i = 0; i <=message.length; i++){
+            setTimeout(function(){
+                $(target).text(message.substr(0,i+1))            
+            },i*100);
+        }
+    }
+
+// キーボードを離したときの関数
+function keyupFunc(e){
+    let key_code = e.keyCode;
+    if(key_code == 37) key.left = false;
+    if(key_code == 38) key.up = false;
+    if(key_code == 39) key.right = false;
+    if(key_code == 40) key.down = false;
+}
+
+// スタートボタン
+$('#cover').click(function(){
+    $(this).animate({opacity: 0}, 1000, function(){
+        $(this).remove();
+    });
+});
+
+// バトル
+let myPoint = 50;
+let enemyPoint1 = 10;
+let enemyPoint2 = 15;
+let enemyPoint3 = 20;
+let battle = 0;
+
+// 敵１
+$('.enemy1 .command1').click(function(){
+    $('.enemy1 .command1').hide();
+    $('.enemy1 .command2').hide();
+    let hitPoint1 = Math.ceil(Math.random()*10);
+    showMessage('.enemy1 .message', 'プレイヤーの攻撃！' + hitPoint1);
+
+    setTimeout(function(){
+        enemyPoint1 -= hitPoint1;
+        if(enemyPoint1 <= 0){
+            enemyPoint1 = 0;
+            $('.enemyPoint1').text(enemyPoint1);
+            showMessage('.enemy1 .message', '敵を倒した！');
+            $('.enemyImg1').hide();
+
+            setTimeout(function(){
+                $('.enemy1 .command1').show();
+                $('.enemy1 .command2').show();
+                $('#hp').hide();
+                $('.enemy1').hide();
+                battle = 0;
+            },2000);
+        } else{
+            $('.enemyPoint1').text(enemyPoint1);
+
+            setTimeout(function(){
+                hitPoint1 = Math.ceil(Math.random()*10);
+                showMessage('.enemy1 .message', '敵の攻撃' + hitPoint1);
+
+                setTimeout(function(){
+                    myPoint -= hitPoint1;
+                    if(myPoint <= 0){
+                        myPoint = 0;
+                        $('.myPoint').text(myPoint);
+                        $('#gameover').show
+                    } else{
+                        $('.myPoint').text(myPoint);
+                        $('.enemy1 .command1').show();
+                        $('.enemy1 .command2').show();
+                    }
+                },2000);
+            },2000);
+        }
+    },2000);
+});
+
+$('.enemy1 .command2').click(function(){
+    $('.enemy1 .command1').hide();
+    $('.enemy1 .command2').hide();
+    let escape = Math.ceil(Math.random()*4);
+    if(escape == 1){
+        showMessage('.enemy1 .message', '敵に回り込まれた');
+
+        setTimeout(function(){
+            $('.enemy1 .message').text('敵の攻撃' + 10);
+
+            setTimeout(function(){
+                myPoint -= 10;
+                if(myPoint <= 0){
+                    myPoint = 0;
+                    $('.myPoint').text(myPoint);
+                    $('#gameover').show
+                } else{
+                    $('.myPoint').text(myPoint);
+                    $('.enemy1 .command1').show();
+                    $('.enemy1 .command2').show();
+                }
+            },2000);
+        },2000)
+    } else{
+        showMessage('.enemy1 .message', 'プレイヤーは逃げ出した！');
+    }
+
+    setTimeout(function(){
+        $('.enemy1 .command1').show();
+        $('.enemy1 .command2').show();
+        $('#hp').hide();
+        $('.enemy1').hide();
+        battle = 0;
+    },2000);
+});
+
+// 敵2
+$('.enemy2 .command1').click(function(){
+    $('.enemy2 .command1').hide();
+    $('.enemy2 .command2').hide();
+    let hitPoint2 = Math.ceil(Math.random()*10);
+    $('.enemy2 .message').text('プレイヤーの攻撃！' + hitPoint2);
+    showMessage('.enemy2 .message', 'プレイヤーの攻撃！' + hitPoint2);
+
+    setTimeout(function(){
+        enemyPoint2 -= hitPoint2;
+        if(enemyPoint2 <= 0){
+            enemyPoint2 = 0;
+            $('.enemyPoint2').text(enemyPoint2);
+            showMessage('.enemy2 .message', '敵を倒した！');
+            $('.enemyImg2').hide();
+
+            setTimeout(function(){
+                $('.enemy2 .command1').show();
+                $('.enemy2 .command2').show();
+                $('#hp').hide();
+                $('.enemy2').hide();
+                battle = 0;
+            },2000);
+        } else{
+            $('.enemyPoint2').text(enemyPoint2);
+
+            setTimeout(function(){
+                hitPoint2 = Math.ceil(Math.random()*10);
+                $('.enemy2 .message').text('敵の攻撃！' + hitPoint2);
+                showMessage('.enemy2 .message', '敵の攻撃！' + hitPoint2);
+
+                setTimeout(function(){
+                    myPoint -= hitPoint2;
+                    if(myPoint <= 0){
+                        myPoint = 0;
+                        $('.myPoint').text(myPoint);
+                        $('#gameover').show
+                    } else{
+                        $('.myPoint').text(myPoint);
+                        $('.enemy2 .command1').show();
+                        $('.enemy2 .command2').show();
+                    }
+                },2000);
+            },2000);
+        }
+    },2000);
+});
+
+$('.enemy2 .command2').click(function(){
+    $('.enemy2 .command1').hide();
+    $('.enemy2 .command2').hide();
+    let escape = Math.ceil(Math.random()*4);
+    if(escape == 1){
+        showMessage('.enemy2 .message', '敵に回り込まれた');
+
+        setTimeout(function(){
+            showMessage('.enemy2 .message', '敵の攻撃' + 15);
+
+            setTimeout(function(){
+                myPoint -= 15;
+                if(myPoint <= 0){
+                    myPoint = 0;
+                    $('.myPoint').text(myPoint);
+                    $('#gameover').show
+                } else{
+                    $('.myPoint').text(myPoint);
+                    $('.enemy2 .command1').show();
+                    $('.enemy2 .command2').show();
+                }
+            },2000);
+        },2000)
+    } else{
+        showMessage('.enemy2 .message', 'プレイヤーは逃げ出した！');
+    }
+
+    setTimeout(function(){
+        $('.enemy2 .command1').show();
+        $('.enemy2 .command2').show();
+        $('#hp').hide();
+        $('.enemy2').hide();
+        battle = 0;
+    },2000);
+});
+
+// 敵3
+$('.enemy3 .command1').click(function(){
+    $('.enemy3 .command1').hide();
+    $('.enemy3 .command2').hide();
+    let hitPoint3 = Math.ceil(Math.random()*10);
+    showMessage('.enemy3 .message', 'プレイヤーの攻撃！' + hitPoint3);
+
+    setTimeout(function(){
+        enemyPoint3 -= hitPoint3;
+        if(enemyPoint3 <= 0){
+            enemyPoint3 = 0;
+            $('.enemyPoint3').text(enemyPoint3);
+            showMessage('.enemy3 .message', '敵を倒した！');
+            $('.enemyImg3').hide();
+
+            setTimeout(function(){
+                $('.enemy3 .command1').show();
+                $('.enemy3 .command2').show();
+                $('#hp').hide();
+                $('.enemy3').hide();
+                battle = 0;
+            },2000);
+        } else{
+            $('.enemyPoint3').text(enemyPoint3);
+
+            setTimeout(function(){
+                hitPoint3 = Math.ceil(Math.random()*10);
+                showMessage('.enemy3 .message', '敵の攻撃！' + hitPoint3);
+
+                setTimeout(function(){
+                    myPoint -= hitPoint3;
+                    if(myPoint <= 0){
+                        myPoint = 0;
+                        $('.myPoint').text(myPoint);
+                        $('#gameover').show
+                    } else{
+                        $('.myPoint').text(myPoint);
+                        $('.enemy3 .command1').show();
+                        $('.enemy3 .command2').show();
+                    }
+                },2000);
+            },2000);
+        }
+    },2000);
+});
+
+$('.enemy3 .command2').click(function(){
+    $('.enemy3 .command1').hide();
+    $('.enemy3 .command2').hide();
+    let escape = Math.ceil(Math.random()*4);
+    if(escape == 1){
+        showMessage('.enemy3 .message', '敵に回り込まれた！');
+
+        setTimeout(function(){
+            $('.enemy3 .message').text('敵の攻撃' + 20);
+            showMessage('.enemy3 .message', '敵の攻撃' + 20);
+
+            setTimeout(function(){
+                myPoint -= 20;
+                if(myPoint <= 0){
+                    myPoint = 0;
+                    $('.myPoint').text(myPoint);
+                    $('#gameover').show
+                } else{
+                    $('.myPoint').text(myPoint);
+                    $('.enemy3 .command1').show();
+                    $('.enemy3 .command2').show();
+                }
+            },2000);
+        },2000)
+    } else{
+        showMessage('.enemy3 .message', 'プレイヤーは逃げ出した！');
+    }
+
+    setTimeout(function(){
+        $('.enemy3 .command1').show();
+        $('.enemy3 .command2').show();
+        $('#hp').hide();
+        $('.enemy3').hide();
+        battle = 0;
+    },2000);
+});
+
+// スタート画面に戻る命令
+function startScreen(){
+    location.reload();
+}
+
+// Gameoverボタン
+$('#gameover').click(function(){
+    startScreen();
+});
+
+// Goalボタン
+$('#goal p').click(function(){
+    startScreen();
+});
+
+// メインループ
+function loop(){
+    // キャンバスの色設定
+    ctx.fillStyle = "#808080";
+
+    // キャンバスの大きさの四角形を描画
+    ctx.fillRect(0, 0, 640, 640);
+
+    // マップの描画
+    for(let y=0; y<map.length; y++){
+        for(let x=0; x<map[y].length; x++){
+            if(map[y][x] == 0) ctx.drawImage(mapImg,0,0,32,32,32*x,32*y,32,32);
+            if(map[y][x] == 1) ctx.drawImage(mapImg,32,0,32,32,32*x,32*y,32,32);
+            if(map[y][x] == 2) ctx.drawImage(mapImg,64,0,32,32,32*x,32*y,32,32);
+        }
+    }
+
+    // 画像を表示
+    ctx.drawImage(player.img, player.x, player.y);
+
+    addEventListener('keydown', keyDownFunc, false);
+    addEventListener('keyup', keyupFunc, false);
+    
+    console.log("----");
+    // 横
+    for(let hori = 0; hori <=640; hori+=32){
+        
+        console.log(Math.abs(hori - player.y));
+        if(Math.abs(hori - player.y) > 32){
+            ctx.fillRect(0,hori,640,32);
+        }
+    }
+
+    // 縦 
+    for(let hori2 = 0; hori2 <=640; hori2+=32){
+        
+        console.log(Math.abs(hori2 - player.x));
+        if(Math.abs(hori2 - player.x) > 32){
+            ctx.fillRect(hori2,0,32,640);
+        }
+    }
+
+    /*ctx.fillRect(0, 0, 640, yy);
+    ctx.fillRect(0, 0, 640, 64);
+    ctx.fillRect(0, 0, 640, 96);
+    ctx.fillRect(0, 0, 640, 128);
+    ctx.fillRect(0, 0, 640, 160);
+    ctx.fillRect(0, 0, 640, 192);
+    ctx.fillRect(0, 0, 640, 224);
+    ctx.fillRect(0, 0, 640, 256);
+    ctx.fillRect(0, 0, 640, 288);
+    ctx.fillRect(0, 0, 640, 320);
+    ctx.fillRect(0, 0, 640, 352);
+    ctx.fillRect(0, 0, 640, 384);
+    ctx.fillRect(0, 0, 640, 416);
+    ctx.fillRect(0, 0, 640, 448);
+    ctx.fillRect(0, 0, 640, 480);
+    ctx.fillRect(0, 0, 640, 512);
+    ctx.fillRect(0, 0, 640, 544);
+    ctx.fillRect(0, 0, 640, 576);
+    ctx.fillRect(0, 0, 640, 608);
+    ctx.fillRect(0, 0, 640, 640);*/
+
+    // 縦
+    // ctx.fillRect(0, 0, 32, 640);
+    // ctx.fillRect(32, 0, 32, 640);
+    // ctx.fillRect(64, 0, 32, 640);
+    // ctx.fillRect(96, 0, 32, 640);
+    // ctx.fillRect(128, 0, 32, 640);
+    // ctx.fillRect(160, 0, 32, 640);
+    // ctx.fillRect(192, 0, 32, 640);
+    // ctx.fillRect(224, 0, 32, 640);
+    // ctx.fillRect(256, 0, 32, 640);
+    // ctx.fillRect(288, 0, 32, 640);
+    // ctx.fillRect(320, 0, 32, 640);
+    // ctx.fillRect(352, 0, 32, 640);
+    // ctx.fillRect(384, 0, 32, 640);
+    // ctx.fillRect(416, 0, 32, 640);
+    // ctx.fillRect(448, 0, 32, 640);
+    // ctx.fillRect(480, 0, 32, 640);
+    // ctx.fillRect(512, 0, 32, 640);
+    // ctx.fillRect(544, 0, 32, 640);
+    // ctx.fillRect(576, 0, 32, 640);
+    // ctx.fillRect(608, 0, 32, 640);
+    // ctx.fillRect(640, 0, 32, 640);
+    
+    // 方向キーが押されている時は、プレイヤーが移動
+    if(player.move == 0){
+        if(key.left == true){
+            let x = player.x/32;
+            let y = player.y/32;
+            x--;
+            if(map[y][x] == 0 || map[y][x] == 2){
+                player.move = 32;
+                key.push = "left";
+            }
+        }
+        if(key.up == true){
+            let x = player.x/32;
+            let y = player.y/32;
+            if(y > 0){
+                y--;
+                if(map[y][x] == 0 || map[y][x] == 2){
+                    player.move = 32;
+                    key.push = "up";
+                }
+            }
+        }
+        if(key.right == true){
+            let x = player.x/32;
+            let y = player.y/32;
+            x++;
+            if(map[y][x] == 0 || map[y][x] == 2){
+                player.move = 32;
+                key.push = "right";
+            }
+        }
+        if(key.down == true){
+            let x = player.x/32;
+            let y = player.y/32;
+            if(y < 19){
+                y++;
+                if(map[y][x] == 0 || map[y][x] == 2){
+                player.move = 32;
+                key.push = "down";
+                }
+            }
+        }
+    }
+
+    // player.moveが 0よりも大きい場合は、4pxずつ移動をつずける
+    if(player.move > 0){
+        player.move -= 4;
+        if(key.push =="left") player.x -= 4;
+        if(key.push =="up") player.y -= 4;
+        if(key.push =="right") player.x += 4;
+        if(key.push =="down") player.y += 4;
+    }
+    
+
+    
+
+    // ゴールについた時の処理
+    if(player.x/32 == 19 && player.y/32 == 19){
+        $('#goal').show();
+    } else{ // 敵に出会う命令
+        if(player.move == 4){
+            let enemyTime = Math.ceil(Math.random()*20);
+            if(enemyTime == 1){
+                if(battle == 0){
+                    battle = enemyTime;
+                    $('#hp').show();
+                    $('.enemy1').show();
+                    enemyPoint1 = 10;
+                    $('.enemyPoint1').text(enemyPoint1);
+                    $('.enemyImg1').show();
+                    // $('.enemy1 .message').text('敵があらわれた！');
+                    showMessage('.enemy1 .message', '敵があらわれた！');
+
+                }
+            } else if(enemyTime == 2){
+                if(battle == 0){
+                    battle = enemyTime;
+                    $('#hp').show();
+                    $('.enemy2').show();
+                    enemyPoint2 = 15;
+                    $('.enemyPoint2').text(enemyPoint2);
+                    $('.enemyImg2').show();
+                    // $('.enemy2 .message').text('敵があらわれた！');
+                    showMessage('.enemy2 .message', '敵があらわれた！')
+                }
+            }  else if(enemyTime == 3){
+                if(battle == 0){
+                    battle = enemyTime;
+                    $('#hp').show();
+                    $('.enemy3').show();
+                    enemyPoint3 = 20;
+                    $('.enemyPoint3').text(enemyPoint3);
+                    $('.enemyImg3').show();
+                    showMessage('.enemy3 .message', '敵があらわれた！');
+                }
+            }
+        }
+    }
+
+    // 処理を繰り返す
+    requestAnimationFrame(loop);
+}
+
+// ページが読み込まれたら、命令を実行
+$(window).on('load',function(){
+    loop();
+});
+
+</script>
+
+</body>
+</html>

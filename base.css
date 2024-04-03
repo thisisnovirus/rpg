@@ -1,0 +1,154 @@
+@charset "utf-8";
+/*===============================================
+リセット
+===============================================*/
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin: 0; padding: 0;} table{ border-collapse: collapse; border-spacing: 0;} img{ border: none; vertical-align: bottom;} address,caption,cite,code,dfn,em,strong,th,var{ font-style:normal; font-weight:normal;} article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{ display: block;}
+a{ text-decoration: none; color: #111111;} a:hover{ text-decoration: underline;} label{ cursor: pointer;}
+/*===============================================
+共通
+===============================================*/
+
+body {
+    background: url(img/istockphoto-1256313468-612x612.png)no-repeat center center;
+    background-size: cover;
+    image-rendering: pixelated;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: -moz-crisp-edges;
+	-ms-interpolation-mode: nearest-neighbor;
+}
+
+#wrapper {
+    width: 640px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#box {
+    position: relative;
+    overflow: hidden;
+}
+
+#hp2 {
+    
+    padding: 10px;
+    color: #fff;
+    font-weight: bold;
+    z-index: 2200;
+    display: flex;
+    font-size: 30pt;
+}
+
+#hp {
+    border: 1px solid #fff;
+    padding: 10px;
+    color: #fff;
+    font-weight: bold;
+    position: absolute;
+    top: 30px;
+    left: 50px;
+    z-index: 900;
+    display: none;
+}
+
+.enemy1,
+.enemy2,
+.enemy3 {
+    width: 640px;
+    height: 640px;
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+}
+
+.enemyName1,
+.enemyName2,
+.enemyName3 {
+    font-size: 2rem;
+    position: absolute;
+    top: 100px;
+    left: 50px;
+}
+
+.enemyImg1,
+.enemyImg2,
+.enemyImg3 {
+    position: absolute;
+    top: 245px;
+    left: 245px;
+}
+
+.commandList {
+    width: 100px;
+    height: 50px;
+    list-style: none;
+    border: 1px solid #fff;
+    padding: 10px;
+    position: absolute;
+    bottom: 50px;
+    left: 50px;
+}
+
+.command1:hover,
+.command2:hover {
+    cursor: pointer;
+    background: #666;
+}
+
+.message {
+    width: 300px;
+    height: 50px;
+    border: 1px solid #fff;
+    padding: 10px;
+    position: absolute;
+    bottom: 50px;
+    left: 200px;
+}
+
+#gameover {
+    width: 640px;
+    height: 640px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    z-index: 1000;
+}
+
+#gameover p:hover {
+    cursor: pointer;
+}
+
+#cover {
+    width: 640px;
+    height: 640px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1200;
+}
+
+#cover p:hover {
+    cursor: pointer;
+}
+
+#goal {
+    width: 640px;
+    height: 640px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    z-index: 1100;
+}
+
+#goal p:hover {
+    cursor: pointer;
+}
